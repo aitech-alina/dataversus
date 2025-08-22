@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Hands4Cause</title>
+    <meta name="description" content="Join Hands4Cause and start making a difference. Create your account to connect with NGOs and volunteer opportunities.">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<!-- Firebase + Your Existing Script -->
+<script type="module">
+    // Import Firebase libraries
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+
+    // 🔹 Your Firebase config (replace with your own from Firebase Console)
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyA3DrTIcXxth-k8hPTJo47IpSoooQ8-wnM",
+  authDomain: "xxxx-c3096.firebaseapp.com",
+  databaseURL: "https://xxxx-c3096-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "xxxx-c3096",
+  storageBucket: "xxxx-c3096.firebasestorage.app",
+  messagingSenderId: "36578678705",
+  appId: "1:36578678705:web:d2198e11d6e09258730f90",
+  measurementId: "G-B7NGGXWHMY"
+};
+    // 🔹 Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    // Password toggle (keep your existing one)
+    window.togglePassword = function(inputId, iconId) {
+        const passwordInput = document.getElementById(inputId);
+        const toggleIcon = document.getElementById(iconId);
+
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.setAttribute('data-lucide', 'eye-off');
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.setAttribute('data-lucide', 'eye');
+        }
+        lucide.createIcons();
+    };
+
+    // 🔹 Form submission with Firebase
+    document.getElementById('signupForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        // Get form data
+        const firstName = document.getElementById('firstName').value;
+        const lastName = document.getElementById('lastName').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const userType = document.getElementById('userType').value;
+        const termsAccepted = document.querySelector('input[name="terms"]').checked;
+
+        // Validation
+        if (password !== confirmPassword) {
+            alert('Passwords do not match!');
+            return;
+        }
+        if (password.length < 8) {
+            alert('Password must be at least 8 characters long!');
+            return;
+        }
+        if (!termsAccepted) {
+            alert('Please accept the Terms of Service and Privacy Policy!');
+            return;
+        }
+
+        try {
+            // 🔹 Create user in Firebase Authentication
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+
+            // 🔹 Save extra user info in Firestore
+            await setDoc(doc(db, "users", user.uid), {
+                firstName: firstName,
+                lastName: lastName,
+                email: email,
+                role: userType,
+                createdAt: new Date().toISOString()
+            });
+
+            alert(`Account created successfully!\nWelcome to Hands4Cause, ${firstName}!`);
+
+            // Redirect to home page
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1000);
+
+        } catch (error) {
+            alert("Signup failed: " + error.message);
+        }
+    });
+
+    // Init Lucide icons
+    lucide.createIcons();
+</script>
+
+<body class="auth-page">
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <!-- Logo and Tagline -->
+                <div class="logo-section">
+                    <div class="logo-icon">
+                        <i data-lucide="heart-handshake"></i>
+                    </div>
+                    <div class="logo-text">
+                        <h1>Hands4Cause</h1>
+                        <p class="tagline">Connecting Volunteers with NGOs</p>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <nav class="nav">
+                    <a href="index.html">Home</a>
+                    <a href="index.html#about">About</a>
+                    <a href="index.html#ngos">NGOs</a>
+                    <a href="index.html#contact">Contact</a>
+                </nav>
+
+                <!-- Auth Buttons -->
+                <div class="header-buttons">
+                    <a href="login.html" class="btn btn-ghost">Login</a>
+                    <a href="index.html#contact" class="btn btn-primary">
+                        <i data-lucide="heart"></i>
+                        Donate
+                    </a>
+                    <button class="mobile-menu-btn">
+                        <i data-lucide="menu"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Signup Section -->
+    <section class="auth-section">
+        <div class="container">
+            <div class="auth-container">
+                <!-- Left Side - Form -->
+                <div class="auth-form-container">
+                    <div class="auth-form">
+                        <div class="auth-header">
+                            <h1>Join Hands4Cause</h1>
+                            <p>Create your account and start making a difference today</p>
+                        </div>
+
+                        <form class="signup-form" id="signupForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="firstName">First Name</label>
+                                    <input type="text" id="firstName" name="firstName" required placeholder="Enter your first name">
+                                </div>
+                                <div class="form-group">
+                                    <label for="lastName">Last Name</label>
+                                    <input type="text" id="lastName" name="lastName" required placeholder="Enter your last name">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="email">Email Address</label>
+                                <input type="email" id="email" name="email" required placeholder="Enter your email">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="password">Password</label>
+                                <div class="password-input">
+                                    <input type="password" id="password" name="password" required placeholder="Create a password">
+                                    <button type="button" class="password-toggle" onclick="togglePassword('password', 'passwordToggleIcon')">
+                                        <i data-lucide="eye" id="passwordToggleIcon"></i>
+                                    </button>
+                                </div>
+                                <div class="password-requirements">
+                                    <small>Password must be at least 8 characters long</small>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="confirmPassword">Confirm Password</label>
+                                <div class="password-input">
+                                    <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="Confirm your password">
+                                    <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword', 'confirmPasswordToggleIcon')">
+                                        <i data-lucide="eye" id="confirmPasswordToggleIcon"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="userType">I want to</label>
+                                <select id="userType" name="userType" required>
+                                    <option value="">Select your role</option>
+                                    <option value="volunteer">Volunteer my time</option>
+                                    <option value="ngo">List my NGO</option>
+                                    <option value="both">Both volunteer and represent an NGO</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="terms" required>
+                                    <span class="checkmark"></span>
+                                    I agree to the <a href="#" class="auth-link">Terms of Service</a> and <a href="#" class="auth-link">Privacy Policy</a>
+                                </label>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="newsletter">
+                                    <span class="checkmark"></span>
+                                    Send me updates about volunteering opportunities
+                                </label>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-full btn-large">
+                                <i data-lucide="user-plus"></i>
+                                Create Account
+                            </button>
+                        </form>
+
+                        <div class="auth-divider">
+                            <span>or sign up with</span>
+                        </div>
+
+                        <div class="social-login">
+                            <button class="btn btn-social">
+                                <i data-lucide="chrome"></i>
+                                Google
+                            </button>
+                            <button class="btn btn-social">
+                                <i data-lucide="facebook"></i>
+                                Facebook
+                            </button>
+                        </div>
+
+                        <div class="auth-footer">
+                            <p>Already have an account? <a href="login.html" class="auth-link">Sign in here</a></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Side - Image/Info -->
+                <div class="auth-image-container">
+                    <div class="auth-image">
+                        <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=800" 
+                             alt="People working together to make a difference">
+                    </div>
+                    <div class="auth-content">
+                        <h2>Make an Impact</h2>
+                        <p>Join a community of changemakers and find meaningful ways to contribute to causes you care about.</p>
+                        
+                        <div class="auth-features">
+                            <div class="auth-feature">
+                                <div class="feature-icon feature-icon-primary">
+                                    <i data-lucide="users"></i>
+                                </div>
+                                <div class="feature-text">
+                                    <h4>Connect with NGOs</h4>
+                                    <p>Find organizations that align with your values</p>
+                                </div>
+                            </div>
+                            
+                            <div class="auth-feature">
+                                <div class="feature-icon feature-icon-secondary">
+                                    <i data-lucide="heart"></i>
+                                </div>
+                                <div class="feature-text">
+                                    <h4>Make a Difference</h4>
+                                    <p>Use your skills to create positive change</p>
+                                </div>
+                            </div>
+                            
+                            <div class="auth-feature">
+                                <div class="feature-icon feature-icon-accent">
+                                    <i data-lucide="clock"></i>
+                                </div>
+                                <div class="feature-text">
+                                    <h4>Flexible Timing</h4>
+                                    <p>Volunteer when it works for your schedule</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer auth-footer-minimal">
+        <div class="container">
+            <div class="footer-minimal-content">
+                <div class="footer-brand">
+                    <div class="logo-icon">
+                        <i data-lucide="heart-handshake"></i>
+                    </div>
+                    <div class="logo-text">
+                        <h3>Hands4Cause</h3>
+                        <p>Connecting Volunteers with NGOs</p>
+                    </div>
+                </div>
+                
+                <div class="footer-links">
+                    <a href="index.html#about">About</a>
+                    <a href="#privacy">Privacy</a>
+                    <a href="#terms">Terms</a>
+                    <a href="index.html#contact">Contact</a>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 Hands4Cause. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+        
+        // Mobile menu toggle
+        document.querySelector('.mobile-menu-btn').addEventListener('click', function() {
+            document.querySelector('.nav').classList.toggle('nav-open');
+        });
+
+        // Password toggle
+        function togglePassword(inputId, iconId) {
+            const passwordInput = document.getElementById(inputId);
+            const toggleIcon = document.getElementById(iconId);
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.setAttribute('data-lucide', 'eye-off');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.setAttribute('data-lucide', 'eye');
+            }
+            lucide.createIcons();
+        }
+
+        // Form submission
+        document.getElementById('signupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const userType = document.getElementById('userType').value;
+            const termsAccepted = document.querySelector('input[name="terms"]').checked;
+            
+            // Validation
+            if (password !== confirmPassword) {
+                alert('Passwords do not match!');
+                return;
+            }
+            
+            if (password.length < 8) {
+                alert('Password must be at least 8 characters long!');
+                return;
+            }
+            
+            if (!termsAccepted) {
+                alert('Please accept the Terms of Service and Privacy Policy!');
+                return;
+            }
+            
+            // Simple validation
+            if (firstName && lastName && email && password && userType) {
+                // Here you would typically send data to your server
+                alert('Account created successfully!\n\nWelcome to Hands4Cause, ' + firstName + '!');
+                
+                // Redirect to home page after successful signup
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1000);
+            }
+        });
+    </script>
+</body>
+</html>
